@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Experience, UserProfile, Attachment } from '../types';
 import { Button, Input, Label, Textarea, Card } from './ui/common';
-import { Plus, Trash2, Zap, Edit2, RotateCcw, X, Upload, FileText, Loader2, Paperclip, Map as MapIcon, List, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Zap, Edit2, RotateCcw, X, Upload, FileText, Loader2, Paperclip, Map as MapIcon, List, Sparkles, MapPin } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { parseExperienceFromFile, parseExperiencesFromFile } from '../services/parser';
 import { ExperienceGraph } from './ExperienceGraph';
 import { ExperienceCardPicker, SituationCard } from './ExperienceCardPicker';
+import { MemoryMilestoneGuide } from './MemoryMilestoneGuide';
 
 interface TimelineProps {
   userProfile: UserProfile;
@@ -22,6 +23,7 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
   const [isTrashOpen, setIsTrashOpen] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [isCardPickerOpen, setIsCardPickerOpen] = useState(false);
+  const [isMilestoneOpen, setIsMilestoneOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -371,6 +373,13 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
     setIsCardPickerOpen(false);
   };
 
+  const handleMilestonesComplete = (newExperiences: Experience[]) => {
+    if (newExperiences.length > 0) {
+      setExperiences(prev => [...prev, ...newExperiences]);
+    }
+    setIsMilestoneOpen(false);
+  };
+
   const renderForm = () => (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -642,6 +651,10 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
                               <Sparkles className="w-4 h-4 mr-2" /> 이런 적 있어? (카드 뽑기)
                            </Button>
 
+                           <Button onClick={() => setIsMilestoneOpen(true)} variant="outline" className="rounded-full shadow-lg px-6 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition-all">
+                              <MapPin className="w-4 h-4 mr-2" /> 기억의 이정표 (가이드)
+                           </Button>
+
                            <input 
                               type="file" 
                               ref={globalFileInputRef}
@@ -858,6 +871,16 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
           <ExperienceCardPicker 
             onSelect={handleCardsSelected} 
             onClose={() => setIsCardPickerOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Milestone Guide Modal */}
+      <AnimatePresence>
+        {isMilestoneOpen && (
+          <MemoryMilestoneGuide 
+            onComplete={handleMilestonesComplete} 
+            onClose={() => setIsMilestoneOpen(false)} 
           />
         )}
       </AnimatePresence>
