@@ -132,10 +132,10 @@ export function MemoryMilestoneGuide({ onComplete, onClose }: MemoryMilestoneGui
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center relative">
+        <div className="p-4 md:p-6 border-b border-gray-100 flex justify-between items-center relative shrink-0">
           <div className="flex items-center gap-2 text-emerald-600 font-bold">
             <MapPin size={20} />
             기억의 이정표
@@ -156,7 +156,7 @@ export function MemoryMilestoneGuide({ onComplete, onClose }: MemoryMilestoneGui
         </div>
 
         {/* Body */}
-        <div className="p-8 flex-1 min-h-[400px] flex flex-col justify-center relative overflow-hidden bg-[#FDFCF8]">
+        <div className="p-4 md:p-8 flex-1 min-h-[300px] flex flex-col justify-start md:justify-center relative overflow-y-auto bg-[#FDFCF8]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -164,20 +164,20 @@ export function MemoryMilestoneGuide({ onComplete, onClose }: MemoryMilestoneGui
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="max-w-xl mx-auto w-full space-y-6"
+              className="max-w-xl mx-auto w-full space-y-4 md:space-y-6 py-4"
             >
-              <div className="text-center space-y-4 mb-8">
-                <div className="text-5xl mb-4">{milestone.icon}</div>
-                <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-sm font-bold rounded-full mb-2">
+              <div className="text-center space-y-2 md:space-y-4 mb-4 md:mb-8">
+                <div className="text-4xl md:text-5xl mb-2 md:mb-4">{milestone.icon}</div>
+                <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs md:text-sm font-bold rounded-full mb-2">
                   이정표 {currentStep + 1} / {MILESTONES.length}
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 break-keep leading-tight">
+                <h2 className="text-xl md:text-3xl font-bold text-gray-900 break-keep leading-tight">
                   {milestone.question}
                 </h2>
-                <p className="text-gray-500">{milestone.description}</p>
+                <p className="text-sm md:text-base text-gray-500">{milestone.description}</p>
               </div>
 
-              <div className="space-y-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="space-y-4 bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700">경험의 제목</label>
                   <Input 
@@ -194,7 +194,7 @@ export function MemoryMilestoneGuide({ onComplete, onClose }: MemoryMilestoneGui
                     placeholder="어떤 일이 있었나요? 무엇을 배웠고, 어떻게 변했는지 자유롭게 적어주세요." 
                     value={currentAnswer.description}
                     onChange={(e) => updateAnswer('description', e.target.value)}
-                    className="h-32 bg-gray-50 border-gray-200 focus:bg-white resize-none"
+                    className="h-24 md:h-32 bg-gray-50 border-gray-200 focus:bg-white resize-none"
                   />
                 </div>
 
@@ -213,15 +213,24 @@ export function MemoryMilestoneGuide({ onComplete, onClose }: MemoryMilestoneGui
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-white border-t border-gray-100 flex justify-between items-center">
-          <Button 
-            variant="ghost" 
-            onClick={handlePrev} 
-            disabled={currentStep === 0}
-            className="text-gray-500"
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" /> 이전
-          </Button>
+        <div className="p-4 md:p-6 bg-white border-t border-gray-100 flex justify-between items-center shrink-0">
+          {currentStep === 0 ? (
+            <Button 
+              variant="ghost" 
+              onClick={onClose} 
+              className="text-gray-500 hover:text-gray-700"
+            >
+              나가기
+            </Button>
+          ) : (
+            <Button 
+              variant="ghost" 
+              onClick={handlePrev} 
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> 이전
+            </Button>
+          )}
           
           <div className="flex gap-3">
             <Button 
