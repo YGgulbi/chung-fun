@@ -1,14 +1,15 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Experience, UserProfile, Attachment } from '../types';
 import { Button, Input, Label, Textarea, Card } from './ui/common';
-import { Plus, Trash2, Zap, Edit2, RotateCcw, X, Upload, FileText, Loader2, Paperclip, Map as MapIcon, List, Sparkles, MapPin } from 'lucide-react';
+import { Plus, Trash2, Zap, Edit2, RotateCcw, X, Upload, FileText, Loader2, Paperclip, Map as MapIcon, List, Sparkles, MapPin, Link as LinkIcon } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
-import { parseExperienceFromFile, parseExperiencesFromFile } from '../services/parser';
+import { parseExperienceFromFile, parseExperiencesFromFile, parseExperiencesFromUrl } from '../services/parser';
 import { ExperienceGraph } from './ExperienceGraph';
 import { ExperienceCardPicker, SituationCard } from './ExperienceCardPicker';
 import { MemoryMilestoneGuide } from './MemoryMilestoneGuide';
+import { UrlImportModal } from './UrlImportModal';
 
 interface TimelineProps {
   userProfile: UserProfile;
@@ -24,6 +25,7 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
   const [isParsing, setIsParsing] = useState(false);
   const [isCardPickerOpen, setIsCardPickerOpen] = useState(false);
   const [isMilestoneOpen, setIsMilestoneOpen] = useState(false);
+  const [isUrlImportOpen, setIsUrlImportOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -380,6 +382,27 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
     setIsMilestoneOpen(false);
   };
 
+  const handleUrlImportComplete = (parsedExperiences: any[]) => {
+    const newExperiences: Experience[] = parsedExperiences.map(exp => ({
+      id: uuidv4(),
+      title: exp.title || '제목 없음',
+      startDate: exp.startDate || new Date().toISOString().split('T')[0].replace(/-/g, '.'),
+      endDate: exp.endDate || new Date().toISOString().split('T')[0].replace(/-/g, '.'),
+      description: exp.description || '내용 없음',
+      category: exp.category || '기타',
+      satisfaction: 5,
+      emotion: '성취',
+      tags: [],
+      attachments: [],
+      energyLevel: 5
+    }));
+    
+    if (newExperiences.length > 0) {
+      setExperiences(prev => [...prev, ...newExperiences]);
+    }
+    setIsUrlImportOpen(false);
+  };
+
   const renderForm = () => (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -655,6 +678,10 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
                               <MapPin className="w-4 h-4 mr-2" /> 기억의 이정표 (가이드)
                            </Button>
 
+                           <Button onClick={() => setIsUrlImportOpen(true)} variant="outline" className="rounded-full shadow-lg px-6 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-all">
+                              <LinkIcon className="w-4 h-4 mr-2" /> 링크로 가져오기
+                           </Button>
+
                            <input 
                               type="file" 
                               ref={globalFileInputRef}
@@ -881,6 +908,16 @@ export function Timeline({ userProfile, experiences, setExperiences, onAnalyze }
           <MemoryMilestoneGuide 
             onComplete={handleMilestonesComplete} 
             onClose={() => setIsMilestoneOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* URL Import Modal */}
+      <AnimatePresence>
+        {isUrlImportOpen && (
+          <UrlImportModal 
+            onComplete={handleUrlImportComplete} 
+            onClose={() => setIsUrlImportOpen(false)} 
           />
         )}
       </AnimatePresence>
